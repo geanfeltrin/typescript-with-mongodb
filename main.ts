@@ -7,11 +7,27 @@ const server = restify.createServer({
 
 })
 
-server.get('/hello', (req, resp, next)=>{
-  resp.json({message :'helo world'})
+server.use(restify.plugins.queryParser())
+
+server.get('/info', [(req, resp, next) => {
+  if(req.userAgent() && req.userAgent().includes('MSIE 7.0')){
+    resp.status(400)
+    resp.json({message: 'Please, update your browser'})
+    return next(false)
+  }
+  return next()
+},
+  (req, resp, next)=>{
+  resp.json({
+    browser: req.userAgent(),
+    method: req.method,
+    url: req.url,
+    path: req.path(),
+    query: req.query
+  })
 
   return next()
-})
+}])
 
 server.listen(3000,() => {
   console.log('Api is running on http://localhost:3000')
