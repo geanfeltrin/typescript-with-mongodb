@@ -1,0 +1,14 @@
+{
+  "name": "typescript-with-mongodb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {"dev": "nodemon dist/main.js"},
+  "dependencies": {
+    "@types/restify": "^8.4.2",
+    "restify": "^8.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
