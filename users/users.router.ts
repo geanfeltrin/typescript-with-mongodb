@@ -5,12 +5,26 @@ import { User } from './users.model';
 
 class UsersRouter extends Router {
   applyRoutes(app: restify.Server) {
+
     app.get('/users', (req,resp,next) => {
       User.findAll().then(users => {
         resp.json(users)
         return next()
       })
     })
+
+    app.get('/users/:id', (req,resp,next)=> {
+      User.findById(req.params.id).then(user => {
+        if(user){
+
+          resp.json(user)
+          return next()
+        }
+        resp.send(404)
+        return next()
+      })
+    })
+
   }
 }
 
