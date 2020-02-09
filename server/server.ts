@@ -1,11 +1,12 @@
 import * as restify from 'restify'
 import { environment } from '../common/environment';
+import { Router } from '../common/router';
 
 export class Server {
   
   app!: restify.Server
 
-  initRoutes(): Promise<any> {
+  initRoutes(routers: Router[] = []): Promise<any> {
     return new Promise((resolve, reject) =>{
       try {
         this.app = restify.createServer({
@@ -17,25 +18,10 @@ export class Server {
         this.app.use(restify.plugins.queryParser())
 
         //routes
-        this.app.get('/info', [(req, resp, next) => {
-          if(req.userAgent() && req.userAgent().includes('MSIE 7.0')){
-            resp.status(400)
-            resp.json({message: 'Please, update your browser'})
-            return next(false)
-          }
-          return next()
-        },
-          (req, resp, next)=>{
-          resp.json({
-            browser: req.userAgent(),
-            method: req.method,
-            url: req.url,
-            path: req.path(),
-            query: req.query
-          })
+        for (let router of routers) {
+          router.applyRoutes(this.app)
+        }
         
-          return next()
-        }])
 
         this.app.listen(environment.server.port,() => {
           resolve(this.app)
@@ -47,8 +33,8 @@ export class Server {
     })
   }
 
-  bootstrap(): Promise<Server> {
-    return this.initRoutes().then(() => this  
+  bootstrap(routers: Router[] = []): Promise<Server> {
+    return this.initRoutes(routers).then(() => this  
     )
   }
 }
