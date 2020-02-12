@@ -1,22 +1,19 @@
-import { Router } from '../common/router';
-import * as restify from 'restify';
-import { User } from './users.model';
-
+import { Router } from '../common/router'
+import * as restify from 'restify'
+import { User } from './users.model'
 
 class UsersRouter extends Router {
-  applyRoutes(app: restify.Server) {
-
-    app.get('/users', (req,resp,next) => {
+  applyRoutes(app: restify.Server): void {
+    app.get('/users', (req, resp, next) => {
       User.find().then(users => {
         resp.json(users)
         return next()
       })
     })
 
-    app.get('/users/:id', (req,resp,next)=> {
+    app.get('/users/:id', (req, resp, next) => {
       User.findById(req.params.id).then(user => {
-        if(user){
-
+        if (user) {
           resp.json(user)
           return next()
         }
@@ -25,18 +22,31 @@ class UsersRouter extends Router {
       })
     })
 
-    app.post('/users', (req, resp,next) => {
+    app.post('/users', (req, resp, next) => {
       const user = new User(req.body)
-
-
       user.save().then(user => {
         user.password = 'undefined'
         resp.json(user)
         return next()
       })
-
     })
 
+    app.put('/users/:id', (req, resp, next) => {
+      const options = { overwrite: true }
+      User.update({ _id: req.params.id }, req.body, options)
+        .exec()
+        .then(result => {
+          if (result.n) {
+            return User.findById(req.params.id)
+          } else {
+            resp.send(404)
+          }
+        })
+        .then(user => {
+          resp.json(user)
+          return next()
+        })
+    })
   }
 }
 
