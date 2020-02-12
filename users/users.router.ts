@@ -3,32 +3,25 @@ import * as restify from 'restify'
 import { User } from './users.model'
 
 class UsersRouter extends Router {
+  constructor() {
+    super()
+    this.on('beforeRender', document => {
+      document.password = undefined
+    })
+  }
+
   applyRoutes(app: restify.Server): void {
     app.get('/users', (req, resp, next) => {
-      User.find().then(users => {
-        resp.json(users)
-        return next()
-      })
+      User.find().then(this.render(resp, next))
     })
 
     app.get('/users/:id', (req, resp, next) => {
-      User.findById(req.params.id).then(user => {
-        if (user) {
-          resp.json(user)
-          return next()
-        }
-        resp.send(404)
-        return next()
-      })
+      User.findById(req.params.id).then(this.render(resp, next))
     })
 
     app.post('/users', (req, resp, next) => {
       const user = new User(req.body)
-      user.save().then(user => {
-        user.password = 'undefined'
-        resp.json(user)
-        return next()
-      })
+      user.save().then(this.render(resp, next))
     })
 
     app.put('/users/:id', (req, resp, next) => {
@@ -42,22 +35,14 @@ class UsersRouter extends Router {
             resp.send(404)
           }
         })
-        .then(user => {
-          resp.json(user)
-          return next()
-        })
+        .then(this.render(resp, next))
     })
 
     app.patch('/users/:id', (req, resp, next) => {
       const options = { new: true }
-      User.findByIdAndUpdate(req.params.id, req.body, options).then(user => {
-        if (user) {
-          resp.json(user)
-          return next()
-        }
-        resp.send(404)
-        return next()
-      })
+      User.findByIdAndUpdate(req.params.id, req.body, options).then(
+        this.render(resp, next)
+      )
     })
 
     app.del('/users/:id', (req, resp, next) => {
