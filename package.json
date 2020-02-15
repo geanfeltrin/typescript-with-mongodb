@@ -7,11 +7,13 @@
     "dev": "nodemon dist/main.js"
   },
   "dependencies": {
+    "bcrypt": "^3.0.8",
     "mongoose": "^5.8.11",
     "restify": "^8.5.1",
     "restify-errors": "^8.0.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
     "@types/eslint": "^6.1.8",
     "@types/mongoose": "^5.7.0",
     "@types/prettier": "^1.19.0",
