@@ -1,11 +1,17 @@
-import mongoose from 'mongoose'
+/* eslint-disable @typescript-eslint/member-delimiter-style */
+/* eslint-disable no-useless-escape */
+/* eslint-disable prettier/prettier */
+import mongoose, { Document } from 'mongoose'
 import { validateCPF } from '../common/validators'
+import bcrypt from 'bcrypt'
+import { environment } from '../common/environment'
+
 const Schema = mongoose.Schema
 
 export interface User extends mongoose.Document {
-  name: string
-  email: string
-  password: string
+  name: string;
+  email: string;
+  password: string;
 }
 
 const userSchema = new Schema({
@@ -39,6 +45,43 @@ const userSchema = new Schema({
       message: '{PATH}: Invalid CPF ({VALUE})',
     },
   },
+})
+
+const hashPassword = (obj: any, next: any) => {
+  bcrypt
+    .hash(obj.password, environment.security.saltRounds)
+    .then(hash => {
+      obj.password = hash
+      next()
+    }).catch(next)
+}
+
+const updateMiddleware = 
+
+
+userSchema.pre<User>('save', function(next) {
+  if (!this.isModified('password')) {
+    next()
+  } else {
+    hashPassword(this,next)
+  }
+})
+
+
+userSchema.pre('findOneAndUpdate', function(next) {
+  if (!this.getUpdate().password) {
+    next()
+  } else {
+    hashPassword(this.getUpdate(),next)   
+  }
+})
+
+userSchema.pre('update', function(next) {
+  if (!this.getUpdate().password) {
+    next()
+  } else {
+    hashPassword(this.getUpdate(),next)   
+  }
 })
 
 export const User = mongoose.model<User>('User', userSchema)
